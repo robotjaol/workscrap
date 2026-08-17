@@ -28,10 +28,13 @@ async function testDiffEngine() {
 }
 
 async function testCompanyDirectory() {
-  assert.equal(COMPANY_DIRECTORY.length, 50);
-  assert.equal(new Set(COMPANY_DIRECTORY.map((company) => company.name)).size, 50);
-  assert.equal(new Set(COMPANY_DIRECTORY.map((company) => company.careerUrl)).size, 50);
+  assert.equal(COMPANY_DIRECTORY.length, 80);
+  assert.equal(new Set(COMPANY_DIRECTORY.map((company) => company.name)).size, 80);
+  assert.equal(new Set(COMPANY_DIRECTORY.map((company) => company.careerUrl)).size, 80);
   assert.ok(COMPANY_DIRECTORY.every((company) => company.careerUrl.startsWith("https://")));
+  assert.ok(COMPANY_DIRECTORY.some((company) => company.name === "Microsoft"));
+  assert.equal(COMPANY_DIRECTORY.filter((company) => company.sector === "FMCG").length, 12);
+  assert.equal(COMPANY_DIRECTORY.filter((company) => company.sector === "Manufacturing").length, 11);
   assert.equal(JOB_RESOURCES[0].name, "Disnakerja");
 }
 

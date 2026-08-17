@@ -210,7 +210,7 @@ HTML scraping is more fragile than a public API. A company may redesign its page
 
 ## Use the company directory
 
-Settings includes 50 official career links across energy, mining, and technology. Search by company or filter by sector.
+Settings includes 80 official career links across energy, FMCG, manufacturing, mining, and technology. Search by company or filter by sector.
 
 Each card provides two actions:
 
@@ -280,6 +280,45 @@ Disnakerja is included as an additional Indonesian vacancy resource. It is an ag
 * [Indosat Ooredoo Hutchison](https://careers.ioh.co.id/)
 * [Xendit](https://www.xendit.co/en/careers/)
 
+## Included FMCG companies
+
+* [Unilever Indonesia](https://careers.unilever.com/en/indonesia)
+* [Garudafood](https://career.garudafood.co.id/Page/Home.aspx)
+* [Nestlé Indonesia](https://www.nestle.co.id/jobs)
+* [Indofood](https://career.indofood.com/vacancy.aspx)
+* [Mayora](https://karir.mayora.co.id/cdb/job/search)
+* [Wings Group](https://www.wingscareer.com/content/Vacancies/?locale=en_GB)
+* [Danone Indonesia](https://careers.danone.com/id/id/home.html)
+* [Coca-Cola Europacific Partners Indonesia](https://www.cocacolaep.com/en-id/careers/)
+* [Procter & Gamble Indonesia](https://www.pgcareers.com/global/en/locations/indonesia)
+* [Mondelēz Indonesia](https://www.mondelezinternational.com/indonesia/)
+* [Kalbe Consumer Health](https://www.kalbeconsumerhealth.com/id/id/karir)
+* [OT Group](https://ot.id/career)
+
+## Included manufacturing companies
+
+* [Astra International](https://career.astra.co.id/)
+* [Toyota Astra Motor](https://recruitment.toyota.astra.co.id/)
+* [Honda Prospect Motor](https://www.honda-indonesia.com/careers)
+* [Astra Honda Motor](https://recruitment.astra-honda.com/)
+* [Astra Daihatsu Motor](https://recruitment.daihatsu.astra.co.id/job)
+* [Yamaha Motor Indonesia](https://www.yamaha-motor.co.id/corporate/career/)
+* [Suzuki Indonesia](https://www.suzuki.co.id/corporate/karir?page=0)
+* [Panasonic Gobel Indonesia](https://www.panasonic.com/id/corporate/careers.html)
+* [Schneider Electric Indonesia](https://www.se.com/id/en/about-us/careers/overview/)
+* [Siemens](https://www.siemens.com/global/en/company/jobs.html)
+* [Samsung Indonesia](https://www.samsung.com/id/about-us/careers/)
+
+## Additional Indonesian energy companies
+
+* [PLN](https://rekrutmen.pln.co.id/vacancy/site)
+* [Pupuk Indonesia](https://karir.pupuk-indonesia.com/)
+* [Chandra Asri Group](https://careers.chandra-asri.com/)
+* [Star Energy Geothermal](https://www.starenergygeothermal.co.id/current-vacancies/)
+* [Tripatra](https://www.tripatra.com/en/careers)
+* [AKR Corporindo](https://careers.akr.co.id/life-at-akr)
+* [Pertamina Geothermal Energy](https://www.pge.pertamina.com/id/perekrutan-pengembangan-dan-retensi-karyawan)
+
 ## Additional Indonesian resource
 
 * [Disnakerja](https://disnakerja.com/)
@@ -346,7 +385,7 @@ From the `extension` folder, run:
 node tests/run-tests.mjs
 ```
 
-Tests use mock responses and do not need a real Telegram token or internet connection. They cover scraper normalization, Workday pagination, baseline creation, new-job detection, Telegram delivery, snapshots, alarms, selector warnings, and the 50-company directory.
+Tests use mock responses and do not need a real Telegram token or internet connection. They cover scraper normalization, Workday pagination, baseline creation, new-job detection, Telegram delivery, snapshots, alarms, selector warnings, and the 80-company directory.
 
 ## Troubleshooting
 
