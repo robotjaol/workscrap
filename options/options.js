@@ -207,7 +207,7 @@ function updateTelegramBadge() {
 function prepareCompanySource(company) {
   const source = createSource("custom");
   source.name = company.name;
-  source.url = company.careerUrl;
+  source.url = company.jobListUrl;
   renderSource(source);
   sourceList.lastElementChild.scrollIntoView({
     behavior: "smooth",
@@ -261,16 +261,25 @@ function renderCompanyDirectory() {
     region.textContent = company.region;
     const link = document.createElement("a");
     link.className = "company-link";
-    link.href = company.careerUrl;
+    link.href = company.jobListUrl;
     link.target = "_blank";
     link.rel = "noreferrer";
-    link.textContent = "Official career site";
+    link.textContent = "Lihat lowongan aktif";
+    const careerLink = document.createElement("a");
+    careerLink.className = "company-link";
+    careerLink.href = company.careerUrl;
+    careerLink.target = "_blank";
+    careerLink.rel = "noreferrer";
+    careerLink.textContent = "Tentang karier";
     const configure = document.createElement("button");
     configure.className = "configure-button";
     configure.type = "button";
     configure.textContent = "Configure monitor";
     configure.addEventListener("click", () => prepareCompanySource(company));
     content.append(tag, name, region, link);
+    if (company.jobListUrl !== company.careerUrl) {
+      content.append(careerLink);
+    }
     card.append(content, configure);
     companyDirectory.append(card);
   }

@@ -452,6 +452,10 @@ select:focus {
   text-decoration: underline;
 }
 
+.company-card .company-link + .company-link {
+  margin-left: 10px;
+}
+
 .company-directory {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

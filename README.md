@@ -210,12 +210,13 @@ HTML scraping is more fragile than a public API. A company may redesign its page
 
 ## Use the company directory
 
-Settings includes 80 official career links across energy, FMCG, manufacturing, mining, and technology. Search by company or filter by sector.
+Settings includes 80 official career links across energy, FMCG, manufacturing, mining, and technology. Search by company or filter by sector. The primary link opens the current job-list page; a separate link keeps the employer's general career page available when the two differ.
 
 Each card provides two actions:
 
-* Official career site opens the verified company page.
-* Configure monitor creates a Custom HTML source with its name and URL filled in.
+* Lihat lowongan aktif opens the direct job-list page.
+* Tentang karier opens the employer's general career page when it is different.
+* Configure monitor creates a Custom HTML source using the job-list URL.
 
 Configure monitor does not guess selectors. Inspect the current job-list HTML and enter the correct selectors before saving. This is deliberate because these companies use different ATS platforms and page structures.
 
@@ -223,7 +224,7 @@ Disnakerja is included as an additional Indonesian vacancy resource. It is an ag
 
 ## Included energy companies
 
-* [SLB](https://careers.slb.com/)
+* [SLB](https://careers.slb.com/job-listing#sortCriteria=%40title%20ascending&f-title-job=Early%20Careers-Engineering%20and%20Manufacturing,Early%20Careers-Technology%20Development&cq=%40source%3D%3D%24%22ATS_Jobs_Source%20-%20Prod%22)
 * [Halliburton](https://careers.halliburton.com/)
 * [Shell](https://www.shell.com/careers.html)
 * [bp](https://www.bp.com/en/global/corporate/careers.html)

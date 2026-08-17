@@ -32,6 +32,12 @@ async function testCompanyDirectory() {
   assert.equal(new Set(COMPANY_DIRECTORY.map((company) => company.name)).size, 80);
   assert.equal(new Set(COMPANY_DIRECTORY.map((company) => company.careerUrl)).size, 80);
   assert.ok(COMPANY_DIRECTORY.every((company) => company.careerUrl.startsWith("https://")));
+  assert.ok(COMPANY_DIRECTORY.every((company) => company.jobListUrl.startsWith("https://")));
+  assert.ok(COMPANY_DIRECTORY.filter((company) => company.jobListUrl !== company.careerUrl).length >= 55);
+  assert.match(
+    COMPANY_DIRECTORY.find((company) => company.name === "SLB").jobListUrl,
+    /careers\.slb\.com\/job-listing#/
+  );
   assert.ok(COMPANY_DIRECTORY.some((company) => company.name === "Microsoft"));
   assert.equal(COMPANY_DIRECTORY.filter((company) => company.sector === "FMCG").length, 12);
   assert.equal(COMPANY_DIRECTORY.filter((company) => company.sector === "Manufacturing").length, 11);
