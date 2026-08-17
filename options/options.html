@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Career Pulse Settings</title>
+    <link rel="stylesheet" href="options.css">
+  </head>
+  <body>
+    <main class="page-shell">
+      <header class="hero">
+        <div>
+          <span class="eyebrow">Career Pulse</span>
+          <h1>Pantau peluang lebih awal</h1>
+          <p>Atur sumber karier dan kirim lowongan baru langsung ke Telegram.</p>
+        </div>
+        <div class="hero-mark" aria-hidden="true">CP</div>
+      </header>
+
+      <section class="panel telegram-panel">
+        <div class="section-heading">
+          <div>
+            <span class="step">01</span>
+            <h2>Telegram</h2>
+          </div>
+          <span id="telegramBadge" class="badge">Belum lengkap</span>
+        </div>
+        <div class="field-grid">
+          <label>
+            <span>Bot token</span>
+            <input id="botToken" type="password" autocomplete="off" placeholder="123456:ABC...">
+          </label>
+          <label>
+            <span>Chat ID</span>
+            <input id="chatId" type="text" autocomplete="off" placeholder="123456789">
+          </label>
+        </div>
+        <div class="button-row">
+          <button id="testTelegram" class="button secondary" type="button">Tes koneksi</button>
+          <span id="telegramResult" class="inline-result" role="status"></span>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading sources-heading">
+          <div>
+            <span class="step">02</span>
+            <h2>Sumber karier</h2>
+          </div>
+          <span id="sourceCount" class="badge">0 sumber</span>
+        </div>
+        <p class="section-copy">Pilih preset ATS atau tambahkan halaman karier dengan selector sendiri.</p>
+        <div class="add-row">
+          <button class="add-button" data-add-type="greenhouse" type="button">Greenhouse</button>
+          <button class="add-button" data-add-type="lever" type="button">Lever</button>
+          <button class="add-button" data-add-type="workday" type="button">Workday</button>
+          <button class="add-button" data-add-type="taleo" type="button">Taleo</button>
+          <button class="add-button" data-add-type="custom" type="button">Custom HTML</button>
+        </div>
+        <div id="emptyState" class="empty-state">
+          <span class="empty-icon">+</span>
+          <strong>Belum ada sumber</strong>
+          <p>Tambahkan satu preset untuk mulai memantau.</p>
+        </div>
+        <div id="sourceList" class="source-list"></div>
+      </section>
+
+      <footer class="save-bar">
+        <span id="saveResult" role="status"></span>
+        <button id="saveSettings" class="button primary" type="button">Simpan pengaturan</button>
+      </footer>
+    </main>
+
+    <template id="sourceTemplate">
+      <article class="source-card">
+        <div class="source-topline">
+          <label class="switch-label">
+            <input class="source-enabled" type="checkbox" checked>
+            <span class="switch"></span>
+            <span>Aktif</span>
+          </label>
+          <span class="type-chip"></span>
+          <button class="remove-button" type="button" aria-label="Hapus sumber">Hapus</button>
+        </div>
+        <div class="field-grid compact-grid">
+          <label>
+            <span>Nama perusahaan</span>
+            <input class="source-name" type="text" placeholder="Nama perusahaan">
+          </label>
+          <label>
+            <span>Interval minimum</span>
+            <span class="input-suffix">
+              <input class="source-interval" type="number" min="5" max="120" value="10">
+              <span>menit</span>
+            </span>
+          </label>
+        </div>
+        <div class="type-fields"></div>
+      </article>
+    </template>
+
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

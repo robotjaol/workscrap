@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Career Pulse</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="brand-mark">CP</div>
+        <div>
+          <h1>Career Pulse</h1>
+          <p id="statusText">Memuat status...</p>
+        </div>
+        <span id="statusDot" class="status-dot"></span>
+      </header>
+
+      <section class="summary">
+        <div>
+          <span>Sumber aktif</span>
+          <strong id="activeCount">0</strong>
+        </div>
+        <div>
+          <span>Alert tersimpan</span>
+          <strong id="alertCount">0</strong>
+        </div>
+      </section>
+
+      <section class="activity">
+        <div class="section-title">
+          <h2>Alert terbaru</h2>
+          <span>5 terakhir</span>
+        </div>
+        <div id="emptyAlerts" class="empty-alerts">Belum ada alert terkirim.</div>
+        <ol id="alertList"></ol>
+      </section>
+
+      <div id="checkResult" class="check-result" role="status"></div>
+      <div class="actions">
+        <button id="manualCheck" class="primary" type="button">Cek sekarang</button>
+        <button id="openOptions" class="secondary" type="button">Pengaturan</button>
+      </div>
+    </main>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
