@@ -65,6 +65,35 @@
         <div id="sourceList" class="source-list"></div>
       </section>
 
+      <section class="panel directory-panel">
+        <div class="section-heading sources-heading">
+          <div>
+            <span class="step">03</span>
+            <h2>Career directory</h2>
+          </div>
+          <span id="directoryCount" class="badge">50 companies</span>
+        </div>
+        <p class="section-copy">Open an official career site or prepare it as a custom monitoring source.</p>
+        <div class="directory-tools">
+          <label class="search-field">
+            <span>Search companies</span>
+            <input id="companySearch" type="search" placeholder="Search SLB, Shell, Google...">
+          </label>
+          <label class="sector-field">
+            <span>Sector</span>
+            <select id="sectorFilter">
+              <option value="all">All sectors</option>
+              <option value="Energy">Energy</option>
+              <option value="Mining">Mining</option>
+              <option value="Technology">Technology</option>
+            </select>
+          </label>
+        </div>
+        <div id="jobResources" class="job-resources"></div>
+        <div id="companyDirectory" class="company-directory"></div>
+        <p id="directoryEmpty" class="directory-empty" hidden>No companies match this search.</p>
+      </section>
+
       <footer class="save-bar">
         <span id="saveResult" role="status"></span>
         <button id="saveSettings" class="button primary" type="button">Simpan pengaturan</button>

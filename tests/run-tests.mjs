@@ -7,6 +7,7 @@ import {
 import { scrapeGreenhouse } from "../background/scrapers/greenhouse.js";
 import { scrapeLever } from "../background/scrapers/lever.js";
 import { scrapeWorkday } from "../background/scrapers/workday.js";
+import { COMPANY_DIRECTORY, JOB_RESOURCES } from "../lib/company-directory.js";
 
 function jsonResponse(data, status = 200) {
   return {
@@ -24,6 +25,14 @@ async function testDiffEngine() {
   assert.deepEqual(createBaseline(jobs), ["a", "b"]);
   assert.deepEqual(findNewJobs(jobs, ["a"]), [jobs[1]]);
   assert.deepEqual(mergeSnapshot(["b", "c"], ["a", "b"]), ["b", "c", "a"]);
+}
+
+async function testCompanyDirectory() {
+  assert.equal(COMPANY_DIRECTORY.length, 50);
+  assert.equal(new Set(COMPANY_DIRECTORY.map((company) => company.name)).size, 50);
+  assert.equal(new Set(COMPANY_DIRECTORY.map((company) => company.careerUrl)).size, 50);
+  assert.ok(COMPANY_DIRECTORY.every((company) => company.careerUrl.startsWith("https://")));
+  assert.equal(JOB_RESOURCES[0].name, "Disnakerja");
 }
 
 async function testGreenhouse() {
@@ -235,6 +244,7 @@ async function testServiceWorker() {
 }
 
 await testDiffEngine();
+await testCompanyDirectory();
 await testGreenhouse();
 await testLever();
 await testWorkday();

@@ -403,6 +403,122 @@ select:focus {
   backdrop-filter: blur(14px);
 }
 
+.directory-tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 210px;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.job-resources {
+  margin-bottom: 16px;
+}
+
+.resource-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 17px;
+  border: 1px solid #bed5c6;
+  border-radius: 14px;
+  background: #edf8f1;
+}
+
+.resource-card > div {
+  margin-right: auto;
+}
+
+.resource-card strong,
+.resource-card span {
+  display: block;
+}
+
+.resource-card span {
+  margin-top: 3px;
+  color: #607269;
+  font-size: 12px;
+}
+
+.resource-card a,
+.company-link {
+  color: #1f6848;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.resource-card a:hover,
+.company-link:hover {
+  text-decoration: underline;
+}
+
+.company-directory {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.company-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #d8e0da;
+  border-radius: 14px;
+  background: #fcfdfc;
+}
+
+.company-card h3 {
+  margin: 8px 0 3px;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+
+.company-card p {
+  margin: 0 0 10px;
+  color: #748178;
+  font-size: 11px;
+}
+
+.sector-tag {
+  display: inline-flex;
+  width: fit-content;
+  padding: 5px 8px;
+  border-radius: 99px;
+  color: #4e6659;
+  background: #edf3ef;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.configure-button {
+  align-self: center;
+  padding: 8px 10px;
+  border: 1px solid #c7d5cc;
+  border-radius: 9px;
+  color: #285f44;
+  background: white;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.configure-button:hover {
+  border-color: #78a98c;
+  background: #f0f8f3;
+}
+
+.directory-empty {
+  padding: 32px 0 12px;
+  color: #76847c;
+  text-align: center;
+  font-size: 13px;
+}
+
+.directory-empty[hidden] {
+  display: none;
+}
+
 @media (max-width: 760px) {
   body {
     min-width: 0;
@@ -422,6 +538,11 @@ select:focus {
   }
 
   .field-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .directory-tools,
+  .company-directory {
     grid-template-columns: 1fr;
   }
 

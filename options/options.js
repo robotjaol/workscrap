@@ -1,4 +1,5 @@
 import { DEFAULT_CONFIG, getConfig, saveConfig } from "../background/storage.js";
+import { COMPANY_DIRECTORY, JOB_RESOURCES } from "../lib/company-directory.js";
 
 const sourceList = document.querySelector("#sourceList");
 const sourceTemplate = document.querySelector("#sourceTemplate");
@@ -9,6 +10,11 @@ const chatId = document.querySelector("#chatId");
 const telegramBadge = document.querySelector("#telegramBadge");
 const telegramResult = document.querySelector("#telegramResult");
 const saveResult = document.querySelector("#saveResult");
+const companyDirectory = document.querySelector("#companyDirectory");
+const directoryCount = document.querySelector("#directoryCount");
+const directoryEmpty = document.querySelector("#directoryEmpty");
+const companySearch = document.querySelector("#companySearch");
+const sectorFilter = document.querySelector("#sectorFilter");
 
 const typeLabels = {
   greenhouse: "Greenhouse",
@@ -198,6 +204,78 @@ function updateTelegramBadge() {
   telegramBadge.classList.toggle("ready", Boolean(ready));
 }
 
+function prepareCompanySource(company) {
+  const source = createSource("custom");
+  source.name = company.name;
+  source.url = company.careerUrl;
+  renderSource(source);
+  sourceList.lastElementChild.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+  sourceList.lastElementChild.querySelector(".source-name").focus();
+}
+
+function renderJobResources() {
+  const container = document.querySelector("#jobResources");
+  for (const resource of JOB_RESOURCES) {
+    const card = document.createElement("article");
+    card.className = "resource-card";
+    const content = document.createElement("div");
+    const name = document.createElement("strong");
+    name.textContent = resource.name;
+    const description = document.createElement("span");
+    description.textContent = resource.description;
+    const link = document.createElement("a");
+    link.href = resource.url;
+    link.target = "_blank";
+    link.rel = "noreferrer";
+    link.textContent = "Open resource";
+    content.append(name, description);
+    card.append(content, link);
+    container.append(card);
+  }
+}
+
+function renderCompanyDirectory() {
+  const query = companySearch.value.trim().toLowerCase();
+  const sector = sectorFilter.value;
+  const companies = COMPANY_DIRECTORY.filter((company) => {
+    const matchesQuery = `${company.name} ${company.region}`.toLowerCase().includes(query);
+    const matchesSector = sector === "all" || company.sector === sector;
+    return matchesQuery && matchesSector;
+  });
+  companyDirectory.replaceChildren();
+  directoryCount.textContent = `${companies.length} companies`;
+  directoryEmpty.hidden = companies.length > 0;
+  for (const company of companies) {
+    const card = document.createElement("article");
+    card.className = "company-card";
+    const content = document.createElement("div");
+    const tag = document.createElement("span");
+    tag.className = "sector-tag";
+    tag.textContent = company.sector;
+    const name = document.createElement("h3");
+    name.textContent = company.name;
+    const region = document.createElement("p");
+    region.textContent = company.region;
+    const link = document.createElement("a");
+    link.className = "company-link";
+    link.href = company.careerUrl;
+    link.target = "_blank";
+    link.rel = "noreferrer";
+    link.textContent = "Official career site";
+    const configure = document.createElement("button");
+    configure.className = "configure-button";
+    configure.type = "button";
+    configure.textContent = "Configure monitor";
+    configure.addEventListener("click", () => prepareCompanySource(company));
+    content.append(tag, name, region, link);
+    card.append(content, configure);
+    companyDirectory.append(card);
+  }
+}
+
 async function loadSettings() {
   const config = await getConfig();
   botToken.value = config.telegram?.token || "";
@@ -218,6 +296,8 @@ document.querySelectorAll("[data-add-type]").forEach((button) => {
 
 botToken.addEventListener("input", updateTelegramBadge);
 chatId.addEventListener("input", updateTelegramBadge);
+companySearch.addEventListener("input", renderCompanyDirectory);
+sectorFilter.addEventListener("change", renderCompanyDirectory);
 
 document.querySelector("#testTelegram").addEventListener("click", async () => {
   telegramResult.classList.remove("error");
@@ -259,3 +339,6 @@ loadSettings().catch((error) => {
   saveResult.textContent = error.message;
   saveResult.classList.add("error");
 });
+
+renderJobResources();
+renderCompanyDirectory();
