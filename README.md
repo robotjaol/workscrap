@@ -1,6 +1,6 @@
 # Career Pulse
 
-Career Pulse is a Chrome and Microsoft Edge extension that checks company career portals for newly published jobs and sends alerts to Telegram.
+Career Pulse is a Brave, Google Chrome, and Microsoft Edge extension that checks company career portals for newly published jobs and sends alerts to Telegram.
 
 It runs entirely inside your browser. There is no backend server, subscription service, build step, or AI API requirement.
 
@@ -22,7 +22,7 @@ The only external API you normally configure is the Telegram Bot API. Greenhouse
 
 Prepare the following before starting:
 
-* Google Chrome or Microsoft Edge
+* Brave, Google Chrome, or Microsoft Edge
 * The downloaded `extension` folder
 * A Telegram account
 * A Telegram bot token from BotFather
@@ -40,6 +40,59 @@ The browser must remain running. It may be minimized and no career tab needs to 
 Each source has its own randomized schedule. Custom HTML sources are kept near the slower end of the polling range. Repeated failures trigger exponential backoff up to 120 minutes.
 
 The first successful check creates a baseline without sending every existing vacancy. Only jobs that appear after that baseline are treated as new.
+
+## Panduan cepat di Brave (Bahasa Indonesia)
+
+Gunakan folder extension yang sudah diekstrak. File ZIP hanya untuk mengunduh atau menyimpan cadangan dan tidak dapat dipilih langsung melalui **Load unpacked**.
+
+### 1. Buat bot Telegram
+
+1. Buka Telegram dan cari akun resmi `@BotFather`.
+2. Kirim perintah `/newbot` dan ikuti petunjuknya.
+3. Salin bot token yang diberikan oleh BotFather dan simpan secara privat.
+4. Buka chat dengan bot baru, tekan **Start**, lalu kirim pesan seperti `hello`.
+5. Buka URL berikut di browser dengan mengganti `YOUR_TOKEN`:
+
+   ```text
+   https://api.telegram.org/botYOUR_TOKEN/getUpdates
+   ```
+
+6. Cari nilai angka di dalam `message.chat.id`. Angka tersebut adalah Chat ID Anda.
+
+### 2. Pasang Career Pulse di Brave
+
+1. Unduh repository sebagai ZIP atau clone repository ini.
+2. Jika menggunakan ZIP, ekstrak terlebih dahulu.
+3. Buka `brave://extensions`.
+4. Aktifkan **Developer mode**.
+5. Klik **Load unpacked**.
+6. Pilih folder `extension` yang langsung berisi `manifest.json`, bukan file ZIP atau folder induknya.
+7. Pin Career Pulse agar mudah dibuka, lalu pilih **Settings**.
+
+### 3. Hubungkan Telegram dan mulai memantau
+
+1. Masukkan bot token dan Chat ID ke Career Pulse Settings.
+2. Klik **Test connection** dan pastikan pesan tes diterima di Telegram.
+3. Tambahkan minimal satu career source.
+4. Klik **Save settings**, lalu klik **Check now** pada popup.
+
+Pemeriksaan pertama membuat baseline dan tidak mengirim semua lowongan lama. Notifikasi baru dikirim saat sebuah ID lowongan yang belum pernah terlihat muncul setelah baseline dibuat. Brave harus tetap berjalan agar pemeriksaan terjadwal dapat berlangsung.
+
+Tombol **Lihat lowongan aktif** membuka portal pekerjaan perusahaan. Tombol **Configure monitor** mengisi URL job-list sebagai Custom HTML source, tetapi selector item, judul, dan link tetap harus diisi. Untuk portal Greenhouse, Lever, atau Workday, gunakan tipe sumber khususnya karena lebih stabil daripada scraping HTML umum.
+
+Jangan membagikan bot token, memasukkannya ke source code, atau melakukan commit token ke GitHub. Token dan Chat ID yang dimasukkan melalui Settings hanya disimpan di `chrome.storage.local` pada profil browser Anda.
+
+## Install in Brave
+
+1. Download or clone this repository.
+2. Extract the download if it is a ZIP archive.
+3. Open Brave and enter `brave://extensions` in the address bar.
+4. Turn on Developer mode.
+5. Click Load unpacked.
+6. Select the `extension` folder containing `manifest.json`.
+7. Pin Career Pulse, open it, and click Settings.
+
+Do not select the ZIP file itself. Brave needs the extracted directory when loading an unpacked extension.
 
 ## Install in Chrome
 
