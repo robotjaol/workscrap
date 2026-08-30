@@ -1,243 +1,146 @@
 # Career Pulse
 
-Career Pulse is a Brave, Google Chrome, and Microsoft Edge extension that checks company career portals for newly published jobs and sends alerts to Telegram.
+[![CI](https://github.com/robotjaol/workscrap/actions/workflows/ci.yml/badge.svg)](https://github.com/robotjaol/workscrap/actions/workflows/ci.yml)
+[![Manifest V3](https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4)](manifest.json)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-It runs entirely inside your browser. There is no backend server, subscription service, build step, or AI API requirement.
+Career Pulse is a local-first Chromium extension that monitors career portals
+and sends newly discovered jobs to Telegram. It runs entirely in the browser:
+there is no project-operated backend, subscription, analytics service, build
+requirement, or AI API.
 
-## Do I need an AI API?
+The extension is designed for personal job discovery. It supports public
+Greenhouse and Lever job-board APIs, configurable Workday CXS endpoints, and
+CSS-selector-based HTML sources for other public career pages.
 
-No. You do not need OpenAI, ChatGPT, Gemini, Claude, or any other AI API.
+## Why Career Pulse
 
-Career Pulse uses a simple, explainable process:
-
-1. The browser checks a configured career portal.
-2. A scraper converts the response into a small list of jobs.
-3. The extension compares those job IDs with its previous snapshot.
-4. A job with an unseen ID is treated as new.
-5. The company, job title, department, and application link are sent to Telegram.
-
-The only external API you normally configure is the Telegram Bot API. Greenhouse and Lever also expose public job-board APIs, but they do not require you to create an API key.
-
-## What you need
-
-Prepare the following before starting:
-
-* Brave, Google Chrome, or Microsoft Edge
-* The downloaded `extension` folder
-* A Telegram account
-* A Telegram bot token from BotFather
-* Your Telegram chat ID
-* At least one career source
-
-Node.js is not required to use the extension. It is only needed if you want to run the automated development tests.
+- **Local-first:** configuration, snapshots, status, and alert history remain in
+  the browser profile.
+- **Explainable detection:** a stable job ID that was not present in the prior
+  snapshot is considered new.
+- **Quiet first run:** the first successful check creates a baseline instead of
+  sending every existing vacancy.
+- **Responsible scheduling:** checks are randomized and repeated failures back
+  off exponentially, up to 120 minutes.
+- **No runtime dependencies:** the extension uses standard JavaScript, HTML,
+  CSS, browser APIs, and the Telegram Bot API.
+- **Curated discovery:** the settings page includes links for 80 employers
+  across energy, mining, technology, FMCG, and manufacturing.
 
 ## How it works
 
-Career Pulse uses a Manifest V3 service worker and the browser alarm system. The worker wakes when an alarm fires, fetches a source, checks for unseen job IDs, saves its state in `chrome.storage.local`, and goes back to sleep.
+```text
+Browser alarm or manual check
+          |
+          v
+Fetch ATS API or public career page
+          |
+          v
+Normalize jobs -> compare job IDs -> update local snapshot
+                                  |
+                                  v
+                        Send new jobs to Telegram
+```
 
-The browser must remain running. It may be minimized and no career tab needs to stay open. Closing the browser stops monitoring until the browser is opened again.
+The Manifest V3 service worker schedules one-shot browser alarms for enabled
+sources. HTML pages are parsed in an offscreen document because service workers
+do not provide DOM APIs. The browser must remain running for scheduled checks;
+no career tab needs to stay open.
 
-Each source has its own randomized schedule. Custom HTML sources are kept near the slower end of the polling range. Repeated failures trigger exponential backoff up to 120 minutes.
+See [the architecture guide](docs/architecture.md) for component boundaries,
+storage keys, and failure behavior.
 
-The first successful check creates a baseline without sending every existing vacancy. Only jobs that appear after that baseline are treated as new.
+## Requirements
 
-## Panduan cepat di Brave (Bahasa Indonesia)
+- Brave, Google Chrome, Microsoft Edge, or a compatible Chromium browser based
+  on Chromium 109 or newer
+- A Telegram account, bot token, and destination chat ID
+- At least one public career source
 
-Gunakan folder extension yang sudah diekstrak. File ZIP hanya untuk mengunduh atau menyimpan cadangan dan tidak dapat dipilih langsung melalui **Load unpacked**.
+Node.js is only required for repository development and automated checks.
 
-### 1. Buat bot Telegram
+## Install from source
 
-1. Buka Telegram dan cari akun resmi `@BotFather`.
-2. Kirim perintah `/newbot` dan ikuti petunjuknya.
-3. Salin bot token yang diberikan oleh BotFather dan simpan secara privat.
-4. Buka chat dengan bot baru, tekan **Start**, lalu kirim pesan seperti `hello`.
-5. Buka URL berikut di browser dengan mengganti `YOUR_TOKEN`:
+1. Download the repository as a ZIP archive or clone it:
+
+   ```shell
+   git clone https://github.com/robotjaol/workscrap.git
+   ```
+
+2. Extract the ZIP if needed.
+3. Open the browser's extension management page:
+   - Brave: `brave://extensions`
+   - Chrome: `chrome://extensions`
+   - Edge: `edge://extensions`
+4. Enable **Developer mode**.
+5. Choose **Load unpacked**.
+6. Select the repository root—the folder that directly contains
+   `manifest.json`.
+7. Pin Career Pulse and open **Settings**.
+
+Do not select a ZIP file or the repository's parent folder. Unpacked extensions
+must be reloaded manually after an update.
+
+## Configure Telegram
+
+1. Open the verified [BotFather](https://t.me/BotFather) account in Telegram.
+2. Send `/newbot` and follow the prompts.
+3. Keep the returned bot token private.
+4. Open a chat with the new bot, press **Start**, and send a message.
+5. Open the following URL after replacing `YOUR_TOKEN`:
 
    ```text
    https://api.telegram.org/botYOUR_TOKEN/getUpdates
    ```
 
-6. Cari nilai angka di dalam `message.chat.id`. Angka tersebut adalah Chat ID Anda.
+6. Find the numeric value in `message.chat.id`.
+7. Enter the token and chat ID in Career Pulse Settings.
+8. Select **Test connection**, then **Save settings**.
 
-### 2. Pasang Career Pulse di Brave
+For a group, add the bot to the group, send a group message, and inspect
+`getUpdates` again. Group chat IDs are commonly negative numbers.
 
-1. Unduh repository sebagai ZIP atau clone repository ini.
-2. Jika menggunakan ZIP, ekstrak terlebih dahulu.
-3. Buka `brave://extensions`.
-4. Aktifkan **Developer mode**.
-5. Klik **Load unpacked**.
-6. Pilih folder `extension` yang langsung berisi `manifest.json`, bukan file ZIP atau folder induknya.
-7. Pin Career Pulse agar mudah dibuka, lalu pilih **Settings**.
+The bot token is stored in `chrome.storage.local`. Browser extension storage is
+not an encrypted secret vault, so use a dedicated bot and protect access to the
+browser profile. Revoke exposed tokens through BotFather immediately.
 
-### 3. Hubungkan Telegram dan mulai memantau
+## Add a source
 
-1. Masukkan bot token dan Chat ID ke Career Pulse Settings.
-2. Klik **Test connection** dan pastikan pesan tes diterima di Telegram.
-3. Tambahkan minimal satu career source.
-4. Klik **Save settings**, lalu klik **Check now** pada popup.
+### Greenhouse
 
-Pemeriksaan pertama membuat baseline dan tidak mengirim semua lowongan lama. Notifikasi baru dikirim saat sebuah ID lowongan yang belum pernah terlihat muncul setelah baseline dibuat. Brave harus tetap berjalan agar pemeriksaan terjadwal dapat berlangsung.
+For a board such as `https://boards.greenhouse.io/examplecompany`, enter
+`examplecompany` as the board token. Career Pulse uses Greenhouse's public job
+board endpoint; no Greenhouse API key is required.
 
-Tombol **Lihat lowongan aktif** membuka portal pekerjaan perusahaan. Tombol **Configure monitor** mengisi URL job-list sebagai Custom HTML source, tetapi selector item, judul, dan link tetap harus diisi. Untuk portal Greenhouse, Lever, atau Workday, gunakan tipe sumber khususnya karena lebih stabil daripada scraping HTML umum.
+### Lever
 
-Jangan membagikan bot token, memasukkannya ke source code, atau melakukan commit token ke GitHub. Token dan Chat ID yang dimasukkan melalui Settings hanya disimpan di `chrome.storage.local` pada profil browser Anda.
+For `https://jobs.lever.co/examplecompany`, enter `examplecompany` as the
+company slug. Career Pulse uses Lever's public postings endpoint; no Lever API
+key is required.
 
-## Install in Brave
+### Workday
 
-1. Download or clone this repository.
-2. Extract the download if it is a ZIP archive.
-3. Open Brave and enter `brave://extensions` in the address bar.
-4. Turn on Developer mode.
-5. Click Load unpacked.
-6. Select the `extension` folder containing `manifest.json`.
-7. Pin Career Pulse, open it, and click Settings.
-
-Do not select the ZIP file itself. Brave needs the extracted directory when loading an unpacked extension.
-
-## Install in Chrome
-
-1. Download or clone this repository.
-2. Open Chrome.
-3. Enter `chrome://extensions` in the address bar.
-4. Turn on Developer mode.
-5. Click Load unpacked.
-6. Select the folder containing `manifest.json`.
-7. Pin Career Pulse from the extensions menu.
-8. Open Career Pulse and click Settings.
-
-If Chrome reports a manifest error, confirm that you selected the `extension` folder itself rather than its parent folder.
-
-## Install in Microsoft Edge
-
-1. Open Edge.
-2. Enter `edge://extensions` in the address bar.
-3. Turn on Developer mode.
-4. Click Load unpacked.
-5. Select the folder containing `manifest.json`.
-6. Open the Career Pulse settings page.
-
-## Create a Telegram bot
-
-Telegram is the notification channel. Career Pulse talks directly to the official Telegram Bot API from your browser.
-
-1. Open Telegram and search for `@BotFather`.
-2. Confirm that the account has the official verification mark.
-3. Send `/newbot`.
-4. Follow the prompts to choose a bot name and username.
-5. Copy the token returned by BotFather.
-6. Open a chat with your new bot.
-7. Press Start or send a normal message such as `hello`.
-
-Your bot cannot send a direct message until you start the conversation first. Keep the bot token private because anyone with the token may control the bot.
-
-## Find your Telegram chat ID
-
-After sending a message to your bot, open this address:
-
-```text
-https://api.telegram.org/botYOUR_TOKEN/getUpdates
-```
-
-Replace `YOUR_TOKEN` with the token from BotFather. Find the number inside `message.chat.id`:
-
-```json
-{
-  "message": {
-    "chat": {
-      "id": 123456789
-    }
-  }
-}
-```
-
-For a group chat, add the bot to the group, send a message there, and call `getUpdates` again. Group chat IDs are commonly negative numbers.
-
-## Connect Telegram
-
-1. Open Career Pulse Settings.
-2. Paste the token into Bot token.
-3. Paste the chat ID into Chat ID.
-4. Click Test connection.
-5. Confirm that Telegram receives the test message.
-6. Click Save settings.
-
-The token and chat ID are stored in `chrome.storage.local` inside your browser profile. They are not committed to the repository or sent to an application backend because no application backend exists.
-
-If a token is exposed, revoke it through BotFather and replace it in the extension immediately.
-
-## Add a Greenhouse source
-
-Greenhouse is the simplest source because it provides a public JSON endpoint.
-
-If a company URL is:
-
-```text
-https://boards.greenhouse.io/examplecompany
-```
-
-The board token is `examplecompany`.
-
-1. Click Greenhouse under Career sources.
-2. Enter the company name.
-3. Enter the board token.
-4. Choose a minimum interval.
-5. Keep the source enabled.
-6. Save the settings.
-
-No Greenhouse API key is required.
-
-## Add a Lever source
-
-If a company URL is:
-
-```text
-https://jobs.lever.co/examplecompany
-```
-
-The company slug is `examplecompany`.
-
-1. Click Lever under Career sources.
-2. Enter the company name and slug.
-3. Choose the interval.
-4. Save the settings.
-
-No Lever API key is required.
-
-## Add a Workday source
-
-Workday endpoints vary between companies. The visible career-page URL is normally not enough.
-
-1. Open the company Workday career page.
-2. Open Developer Tools.
-3. Select Network.
-4. Search or filter the job list.
-5. Find a request containing `/wday/cxs/` and ending in `/jobs`.
-6. Copy the complete request URL.
-7. Add a Workday source in Career Pulse.
-8. Paste the URL into Endpoint CXS.
-9. Save the settings.
-
-A typical endpoint resembles:
+Workday endpoints differ by tenant and career site. Open the career page's
+browser Network panel, find the job-list request containing `/wday/cxs/` and
+ending in `/jobs`, and paste the complete HTTPS endpoint. A typical endpoint is:
 
 ```text
 https://company.wd3.myworkdayjobs.com/wday/cxs/company/site/jobs
 ```
 
-If the source later fails, inspect the network request again because the tenant or site name may have changed.
+### Custom HTML and Taleo
 
-## Add a custom HTML or Taleo source
+These source types fetch a public HTTPS page and extract jobs with CSS selectors:
 
-Use Custom HTML or Taleo when the site does not expose a supported JSON endpoint.
+- **Item selector** identifies one complete job card or row.
+- **Title selector** finds the title within that item.
+- **Link selector** finds the application link.
+- **Department selector** is optional.
+- **ID selector** is optional; without one, Career Pulse hashes the title and
+  application URL.
 
-Three CSS selectors are required:
-
-* Item selector identifies one complete job card or row.
-* Title selector finds the job title inside each item.
-* Link selector finds the application link inside each item.
-
-Department selector and ID selector are optional.
-
-For this HTML:
+For example:
 
 ```html
 <article class="job-card" data-job-id="123">
@@ -247,244 +150,150 @@ For this HTML:
 </article>
 ```
 
-Use:
+Use `.job-card`, `.job-title`, `a.job-link`, `.department`, and
+`[data-job-id]` respectively.
 
-```text
-Item selector: .job-card
-Title selector: .job-title
-Link selector: a.job-link
-Department selector: .department
-ID selector: [data-job-id]
-```
+The Taleo adapter currently uses the same configurable HTML parser as Custom
+HTML; it is not a universal Taleo API integration. HTML monitoring cannot parse
+jobs rendered only after client-side JavaScript runs, and selectors may break
+when a site is redesigned. Career Pulse sends a warning after two consecutive
+checks find no matching items.
 
-When no ID is available, Career Pulse creates a stable hash from the title and application URL.
+## Company directory
 
-HTML scraping is more fragile than a public API. A company may redesign its page, require JavaScript rendering, add bot protection, or change its Terms of Service. If selectors return no jobs for two consecutive checks, Career Pulse sends a Telegram warning.
+The settings page contains a searchable directory of 80 employer career pages
+and an additional Indonesian job resource. Directory entries help users find a
+career site or prefill a Custom HTML source; they do not include working CSS
+selectors automatically.
 
-## Use the company directory
-
-Settings includes 80 official career links across energy, FMCG, manufacturing, mining, and technology. Search by company or filter by sector. The primary link opens the current job-list page; a separate link keeps the employer's general career page available when the two differ.
-
-Each card provides two actions:
-
-* Lihat lowongan aktif opens the direct job-list page.
-* Tentang karier opens the employer's general career page when it is different.
-* Configure monitor creates a Custom HTML source using the job-list URL.
-
-Configure monitor does not guess selectors. Inspect the current job-list HTML and enter the correct selectors before saving. This is deliberate because these companies use different ATS platforms and page structures.
-
-Disnakerja is included as an additional Indonesian vacancy resource. It is an aggregator, not an employer portal. Always verify a vacancy against the employer's official website before applying.
-
-## Included energy companies
-
-* [SLB](https://careers.slb.com/job-listing#sortCriteria=%40title%20ascending&f-title-job=Early%20Careers-Engineering%20and%20Manufacturing,Early%20Careers-Technology%20Development&cq=%40source%3D%3D%24%22ATS_Jobs_Source%20-%20Prod%22)
-* [Halliburton](https://careers.halliburton.com/)
-* [Shell](https://www.shell.com/careers.html)
-* [bp](https://www.bp.com/en/global/corporate/careers.html)
-* [ExxonMobil](https://jobs.exxonmobil.com/)
-* [Chevron](https://careers.chevron.com/)
-* [Baker Hughes](https://careers.bakerhughes.com/global/en)
-* [Weatherford](https://careers.weatherford.com/)
-* [TechnipFMC](https://careers.technipfmc.com/)
-* [Saipem](https://www.saipem.com/en/people/careers)
-* [PETRONAS](https://careers.petronas.com/)
-* [Pertamina](https://recruitment.pertamina.com/)
-* [MedcoEnergi](https://www.medcoenergi.com/en/career/)
-* [ConocoPhillips](https://careers.conocophillips.com/)
-* [TotalEnergies](https://careers.totalenergies.com/)
-* [Eni](https://www.eni.com/en-IT/careers.html)
-* [Wood](https://www.woodplc.com/careers)
-* [Worley](https://www.worley.com/en/careers)
-
-## Included mining companies
-
-* [Freeport-McMoRan](https://jobs.fcx.com/)
-* [Vale](https://vale.com/ca/career-opportunities)
-* [Newmont](https://jobs.newmont.com/)
-* [Rio Tinto](https://www.riotinto.com/en/careers)
-* [BHP](https://www.bhp.com/careers)
-* [Anglo American](https://www.angloamerican.com/careers/job-opportunities)
-* [Barrick](https://jobs.barrick.com/)
-* [Glencore](https://www.glencore.com/en/careers)
-* [Thiess](https://thiess.com/en/people-and-careers)
-* [Orica](https://careers.orica.com/)
-* [ANTAM](https://www.antam.com/en/career)
-* [Adaro](https://adarocareer.com/index.php/home/job_list/)
-* [Bukit Asam](https://www.ptba.co.id/karir)
-* [Harita Nickel](https://careers.haritanickel.com/)
-* [AMMAN Mineral](https://careers.amman.co.id/)
-* [Kaltim Prima Coal](https://www.kpc.co.id/career/)
-* [Petrosea](https://career.petrosea.com/?locale=en_GB)
-
-## Included technology companies
-
-* [Microsoft](https://careers.microsoft.com/)
-* [Google](https://www.google.com/about/careers/applications/)
-* [Amazon](https://www.amazon.jobs/)
-* [IBM](https://www.ibm.com/careers)
-* [Oracle](https://careers.oracle.com/)
-* [SAP](https://jobs.sap.com/)
-* [NVIDIA](https://www.nvidia.com/en-us/about-nvidia/careers/)
-* [Grab](https://www.grab.careers/)
-* [GoTo](https://www.gotocompany.com/careers)
-* [Traveloka](https://careers.traveloka.com/)
-* [Sea](https://career.sea.com/)
-* [ByteDance](https://joinbytedance.com/)
-* [Telkom Indonesia](https://careers.telkom.co.id/)
-* [Indosat Ooredoo Hutchison](https://careers.ioh.co.id/)
-* [Xendit](https://www.xendit.co/en/careers/)
-
-## Included FMCG companies
-
-* [Unilever Indonesia](https://careers.unilever.com/en/indonesia)
-* [Garudafood](https://career.garudafood.co.id/Page/Home.aspx)
-* [Nestlé Indonesia](https://www.nestle.co.id/jobs)
-* [Indofood](https://career.indofood.com/vacancy.aspx)
-* [Mayora](https://karir.mayora.co.id/cdb/job/search)
-* [Wings Group](https://www.wingscareer.com/content/Vacancies/?locale=en_GB)
-* [Danone Indonesia](https://careers.danone.com/id/id/home.html)
-* [Coca-Cola Europacific Partners Indonesia](https://www.cocacolaep.com/en-id/careers/)
-* [Procter & Gamble Indonesia](https://www.pgcareers.com/global/en/locations/indonesia)
-* [Mondelēz Indonesia](https://www.mondelezinternational.com/indonesia/)
-* [Kalbe Consumer Health](https://www.kalbeconsumerhealth.com/id/id/karir)
-* [OT Group](https://ot.id/career)
-
-## Included manufacturing companies
-
-* [Astra International](https://career.astra.co.id/)
-* [Toyota Astra Motor](https://recruitment.toyota.astra.co.id/)
-* [Honda Prospect Motor](https://www.honda-indonesia.com/careers)
-* [Astra Honda Motor](https://recruitment.astra-honda.com/)
-* [Astra Daihatsu Motor](https://recruitment.daihatsu.astra.co.id/job)
-* [Yamaha Motor Indonesia](https://www.yamaha-motor.co.id/corporate/career/)
-* [Suzuki Indonesia](https://www.suzuki.co.id/corporate/karir?page=0)
-* [Panasonic Gobel Indonesia](https://www.panasonic.com/id/corporate/careers.html)
-* [Schneider Electric Indonesia](https://www.se.com/id/en/about-us/careers/overview/)
-* [Siemens](https://www.siemens.com/global/en/company/jobs.html)
-* [Samsung Indonesia](https://www.samsung.com/id/about-us/careers/)
-
-## Additional Indonesian energy companies
-
-* [PLN](https://rekrutmen.pln.co.id/vacancy/site)
-* [Pupuk Indonesia](https://karir.pupuk-indonesia.com/)
-* [Chandra Asri Group](https://careers.chandra-asri.com/)
-* [Star Energy Geothermal](https://www.starenergygeothermal.co.id/current-vacancies/)
-* [Tripatra](https://www.tripatra.com/en/careers)
-* [AKR Corporindo](https://careers.akr.co.id/life-at-akr)
-* [Pertamina Geothermal Energy](https://www.pge.pertamina.com/id/perekrutan-pengembangan-dan-retensi-karyawan)
-
-## Additional Indonesian resource
-
-* [Disnakerja](https://disnakerja.com/)
-
-## Run a manual check
-
-1. Click the Career Pulse icon.
-2. Confirm that at least one source is active.
-3. Click Check now.
-4. Wait for the summary.
-
-The popup shows active sources and the five latest alerts. The rolling history retains up to 50 alerts locally.
-
-For detailed output, open `chrome://extensions`, find Career Pulse, and click the service worker link. Successful results use the `Career Pulse jobs` console label.
-
-## Simulate a new job
-
-1. Run a successful check to create a baseline.
-2. Open Developer Tools for an extension page.
-3. Open Application, Extension storage, and Local.
-4. Find `snapshots`.
-5. Remove one job ID from the source being tested.
-6. Save the storage value.
-7. Click Check now again.
-
-The removed ID should be detected as new and sent to Telegram.
+Links change over time, and some job-list actions lead to an employer's selected
+recruiting platform. Inclusion does not imply affiliation, endorsement, or a
+guarantee that automated access is allowed. Verify vacancies on the employer's
+official site before applying.
 
 ## Permissions
 
-The manifest includes fixed access for Greenhouse, Lever, Telegram, common Workday hosts, and Taleo. Custom websites request their host permission when settings are saved.
+| Permission | Why it is needed |
+| --- | --- |
+| `alarms` | Schedule source checks while the browser is running |
+| `storage` | Save configuration, snapshots, status, and recent alerts locally |
+| `offscreen` | Parse fetched HTML with browser DOM APIs |
+| Fixed Greenhouse, Lever, and Telegram hosts | Reach supported public APIs without a separate prompt |
+| Optional HTTPS hosts | Fetch a Workday, Taleo, or Custom HTML source after user approval |
 
-If a host permission is denied, the source cannot be fetched. Open the browser extension details page to review or restore site access.
+Career Pulse does not request access to normal page contents, browsing history,
+cookies, downloads, or tabs. Configurable sources are restricted to HTTPS.
 
 ## Privacy and security
 
-Career Pulse stores these values locally:
+Career Pulse stores the following in the local browser profile:
 
-* Telegram bot token
-* Telegram chat ID
-* Source configuration
-* Job ID snapshots
-* Source status and errors
-* Rolling alert history
+- Telegram bot token and chat ID
+- source configuration
+- job ID snapshots, limited to 500 per source
+- source status and error messages
+- the 50 most recent successfully sent alerts
 
-The extension has no analytics, advertising, user tracking, or remote application server.
+Career requests go directly from the browser using the user's network
+connection. Alert messages pass through Telegram's infrastructure. Career Pulse
+has no analytics, advertising, remote application server, or remote code loader.
 
-Telegram messages pass through Telegram's infrastructure. Career requests go directly from your browser and use your own network connection and IP address.
+Do not configure private pages, authenticated applicant portals, browser
+cookies, passwords, or private API keys as sources. See the full
+[security policy](SECURITY.md) for the reporting process and threat model.
 
-Do not monitor private pages requiring an employer, employee, or applicant login. Never place browser cookies, passwords, or private API keys in source fields.
+## Known limitations
 
-## Responsible use
-
-Public visibility does not automatically mean automated access is permitted. Review each site's Terms of Service before enabling HTML scraping.
-
-Prefer public ATS endpoints such as Greenhouse and Lever. Use slower intervals for custom pages. Career Pulse is intended for personal job searching, not commercial redistribution.
-
-Always apply through an official company domain. Be cautious when a vacancy asks for money, travel payment, financial information, or contact through an unrelated personal account.
-
-## Run automated tests
-
-From the `extension` folder, run:
-
-```powershell
-node tests/run-tests.mjs
-```
-
-Tests use mock responses and do not need a real Telegram token or internet connection. They cover scraper normalization, Workday pagination, baseline creation, new-job detection, Telegram delivery, snapshots, alarms, selector warnings, and the 80-company directory.
+- Scheduled monitoring stops when the browser is fully closed.
+- Browser and operating-system power policies may delay alarms.
+- A career site may block automated requests, require authentication, enforce
+  rate limits, or prohibit scraping in its terms.
+- Custom HTML sources cannot execute a site's JavaScript before parsing.
+- Upstream ATS response formats and career-page selectors can change without
+  notice.
+- Detection depends on stable IDs or stable title-and-link hashes; unstable
+  upstream identifiers can produce duplicate alerts.
+- Telegram is currently the only notification channel.
 
 ## Troubleshooting
 
 ### The Telegram test does not arrive
 
-Confirm that you started the bot chat, copied the complete token, and used the correct chat ID. Send a fresh message and call `getUpdates` again.
+Confirm that the bot chat was started, the complete token was copied, and the
+chat ID is correct. Send the bot a fresh message and inspect `getUpdates` again.
 
-### A source always returns an error
+### A source returns HTTP 403 or 429
 
-Open the service worker console and inspect the HTTP status. A 403 or 429 normally means access control or rate limiting. Let the backoff work instead of repeatedly clicking Check now.
+The site is denying or rate-limiting automated requests. Do not attempt to
+bypass its controls. Allow the built-in backoff to run, review the site's terms,
+and prefer a supported public ATS endpoint when one is available.
 
 ### A custom source finds no jobs
 
-Recheck the item, title, and link selectors. The page may render jobs through JavaScript while the fetched HTML contains none. Look for a public JSON request in Network and use a supported ATS type when possible.
+Inspect the raw HTML response and recheck the item, title, and link selectors.
+If the page renders jobs with JavaScript, look for a public ATS or JSON request
+in the Network panel instead.
 
 ### Workday stopped working
 
-Inspect the career portal Network tab and locate the current CXS request. The tenant or career site name may have changed.
-
-### Alerts are duplicated
-
-The site may change IDs or URLs on every request. A stable ID selector is better than a title-based fallback.
+Locate the current CXS request again. The employer may have changed its tenant,
+site name, or public endpoint.
 
 ### Automatic checks do not run
 
-Keep Chrome or Edge running. Confirm the source is enabled and the browser has not suspended the extension through battery or enterprise policies.
+Keep the browser running, confirm the source is enabled, and check whether
+battery or enterprise policies have suspended the extension.
+
+For detailed errors, open the extension management page and inspect the Career
+Pulse service worker. Remove all tokens, chat IDs, and personal data before
+sharing logs.
+
+## Development
+
+Career Pulse has no third-party runtime or development packages. Node.js 20 or
+newer is used for repository checks, mocked tests, and distribution assembly.
+
+```shell
+npm install
+npm run verify
+```
+
+The verification command checks manifest and repository invariants, validates
+JavaScript syntax, runs deterministic tests without real network credentials,
+and creates a clean unpacked extension in `dist/career-pulse`.
+
+See [docs/development.md](docs/development.md) for the complete workflow. A live
+directory link audit is available through `npm run test:links`, but is excluded
+from CI because employer sites often block automated infrastructure.
 
 ## Project structure
 
 ```text
-background/
-  scrapers/
-  diff-engine.js
-  html-parser.js
-  service-worker.js
-  storage.js
-  telegram-client.js
-lib/
-  company-directory.js
-  selectors.json
-offscreen/
-options/
-popup/
-tests/
-manifest.json
+.github/               GitHub workflows and collaboration templates
+background/            Service worker, storage, delivery, and scrapers
+docs/                  Architecture and development guides
+lib/                   Shared validation and directory data
+offscreen/             DOM-based HTML parser
+options/               Settings and company directory UI
+popup/                 Status and manual-check UI
+scripts/               Repository checks and distribution build
+tests/                 Deterministic mocked tests and optional link audit
+manifest.json          Chromium extension manifest
 ```
 
-The project uses plain JavaScript, HTML, and CSS. Edit a file, return to the extensions page, and click Reload to test the change.
+## Contributing
+
+Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md), follow the
+[Code of Conduct](CODE_OF_CONDUCT.md), and run `npm run verify` before opening a
+pull request. Use [SECURITY.md](SECURITY.md) for private vulnerability reports.
+
+## Responsible use
+
+Public visibility does not automatically permit automated access. Review each
+site's terms and robots guidance, use conservative intervals, and never bypass
+authentication, bot protection, or rate limits. Career Pulse is intended for
+personal job discovery, not bulk harvesting or commercial redistribution.
+
+## License
+
+Career Pulse is available under the [MIT License](LICENSE).

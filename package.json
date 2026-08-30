@@ -1,0 +1,26 @@
+{
+  "name": "career-pulse",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A local-first Chromium extension that monitors career portals and sends new-job alerts to Telegram.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/check-repository.mjs",
+    "test": "node tests/run-tests.mjs",
+    "test:links": "node tests/audit-links.mjs",
+    "verify": "node scripts/verify.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/robotjaol/workscrap.git"
+  },
+  "bugs": {
+    "url": "https://github.com/robotjaol/workscrap/issues"
+  },
+  "homepage": "https://github.com/robotjaol/workscrap#readme"
+}

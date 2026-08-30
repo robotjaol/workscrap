@@ -1,0 +1,67 @@
+name: Bug report
+description: Report a reproducible problem in Career Pulse.
+title: "[Bug]: "
+labels: [bug, needs-triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve Career Pulse. Remove all tokens, chat IDs,
+        cookies, and personal information before submitting.
+  - type: input
+    id: version
+    attributes:
+      label: Career Pulse version
+      description: Find this value on the browser extension details page.
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      options:
+        - Brave
+        - Google Chrome
+        - Microsoft Edge
+        - Other Chromium browser
+    validations:
+      required: true
+  - type: input
+    id: browser-version
+    attributes:
+      label: Browser version
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Problem
+      description: Describe what happened and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      placeholder: |
+        1. Configure...
+        2. Click...
+        3. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Sanitized logs
+      description: Paste relevant service worker errors after removing secrets and personal data.
+      render: text
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Safety checks
+      options:
+        - label: I removed all tokens, chat IDs, cookies, and personal information.
+          required: true
+        - label: I searched existing issues for the same problem.
+          required: true

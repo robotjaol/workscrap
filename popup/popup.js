@@ -14,7 +14,7 @@ const checkResult = document.querySelector("#checkResult");
 const manualCheck = document.querySelector("#manualCheck");
 
 function formatTime(timestamp) {
-  return new Intl.DateTimeFormat("id-ID", {
+  return new Intl.DateTimeFormat(undefined, {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
@@ -32,6 +32,7 @@ function renderAlerts(alerts) {
     const link = document.createElement("a");
     link.href = alert.url;
     link.target = "_blank";
+    link.rel = "noreferrer";
     const title = document.createElement("strong");
     title.textContent = alert.title;
     const meta = document.createElement("span");
@@ -51,7 +52,9 @@ async function refreshPopup() {
   const enabledSources = config.sources.filter((source) => source.enabled);
   activeCount.textContent = enabledSources.length;
   alertCount.textContent = alerts.length;
-  statusText.textContent = activity.active ? "Monitoring aktif" : "Monitoring belum aktif";
+  statusText.textContent = activity.message || (
+    activity.active ? "Monitoring is active" : "Monitoring is not active"
+  );
   statusDot.classList.toggle("active", activity.active);
   renderAlerts(alerts);
 }
@@ -59,7 +62,7 @@ async function refreshPopup() {
 manualCheck.addEventListener("click", async () => {
   manualCheck.disabled = true;
   checkResult.classList.remove("error");
-  checkResult.textContent = "Memeriksa semua sumber...";
+  checkResult.textContent = "Checking all sources...";
   try {
     const response = await chrome.runtime.sendMessage({ type: "manual-check" });
     if (!response.ok) {
@@ -70,7 +73,9 @@ manualCheck.addEventListener("click", async () => {
       (total, result) => total + (result.newCount || 0),
       0
     );
-    checkResult.textContent = `${successes} sumber selesai, ${newJobs} lowongan baru.`;
+    const sourceLabel = successes === 1 ? "source" : "sources";
+    const jobLabel = newJobs === 1 ? "new job" : "new jobs";
+    checkResult.textContent = `${successes} ${sourceLabel} completed, ${newJobs} ${jobLabel}.`;
     await refreshPopup();
   } catch (error) {
     checkResult.textContent = error.message;

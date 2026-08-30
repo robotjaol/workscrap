@@ -1,5 +1,9 @@
 import { DEFAULT_CONFIG, getConfig, saveConfig } from "../background/storage.js";
 import { COMPANY_DIRECTORY, JOB_RESOURCES } from "../lib/company-directory.js";
+import {
+  permissionOrigins,
+  validateConfig
+} from "../lib/config-validator.js";
 
 const sourceList = document.querySelector("#sourceList");
 const sourceTemplate = document.querySelector("#sourceTemplate");
@@ -30,8 +34,8 @@ function fieldMarkup(type) {
       <div class="field-grid">
         <label class="wide-field">
           <span>Board token</span>
-          <input data-field="boardToken" type="text" placeholder="contoh: nama-perusahaan">
-          <small class="helper">Bagian terakhir URL boards.greenhouse.io.</small>
+          <input data-field="boardToken" type="text" spellcheck="false" placeholder="example-company">
+          <small class="helper">The final segment of the boards.greenhouse.io URL.</small>
         </label>
       </div>`;
   }
@@ -40,8 +44,8 @@ function fieldMarkup(type) {
       <div class="field-grid">
         <label class="wide-field">
           <span>Company slug</span>
-          <input data-field="company" type="text" placeholder="contoh: nama-perusahaan">
-          <small class="helper">Bagian terakhir URL jobs.lever.co.</small>
+          <input data-field="company" type="text" spellcheck="false" placeholder="example-company">
+          <small class="helper">The final segment of the jobs.lever.co URL.</small>
         </label>
       </div>`;
   }
@@ -51,36 +55,36 @@ function fieldMarkup(type) {
         <label class="wide-field">
           <span>Endpoint CXS</span>
           <input data-field="endpoint" type="url" placeholder="https://host/wday/cxs/tenant/site/jobs">
-          <small class="helper">Salin endpoint jobs dari DevTools Network.</small>
+          <small class="helper">Copy the jobs endpoint from the browser Network panel.</small>
         </label>
       </div>`;
   }
   return `
     <div class="field-grid">
       <label class="wide-field">
-        <span>URL halaman karier</span>
+        <span>Career page URL</span>
         <input data-field="url" type="url" placeholder="https://company.com/careers">
       </label>
       <label>
-        <span>Selector item</span>
+        <span>Item selector</span>
         <input data-field="itemSelector" type="text" placeholder=".job-card">
       </label>
       <label>
-        <span>Selector judul</span>
+        <span>Title selector</span>
         <input data-field="titleSelector" type="text" placeholder=".job-title">
       </label>
       <label>
-        <span>Selector link</span>
+        <span>Link selector</span>
         <input data-field="linkSelector" type="text" placeholder="a">
       </label>
       <label>
-        <span>Selector departemen</span>
+        <span>Department selector</span>
         <input data-field="departmentSelector" type="text" placeholder=".department">
       </label>
       <label class="wide-field">
-        <span>Selector ID opsional</span>
+        <span>Optional ID selector</span>
         <input data-field="idSelector" type="text" placeholder="[data-job-id]">
-        <small class="helper">Tanpa ID, extension memakai hash judul dan link.</small>
+        <small class="helper">Without an ID, Career Pulse hashes the title and link.</small>
       </label>
     </div>`;
 }
@@ -89,7 +93,7 @@ function createSource(type) {
   return {
     id: crypto.randomUUID(),
     type,
-    name: `Sumber ${typeLabels[type]}`,
+    name: `${typeLabels[type]} source`,
     intervalMin: type === "custom" || type === "taleo" ? 15 : 10,
     enabled: true
   };
@@ -97,7 +101,7 @@ function createSource(type) {
 
 function updateCount() {
   const count = sourceList.children.length;
-  sourceCount.textContent = `${count} sumber`;
+  sourceCount.textContent = `${count} ${count === 1 ? "source" : "sources"}`;
   emptyState.hidden = count > 0;
 }
 
@@ -147,60 +151,17 @@ function collectConfig() {
   };
 }
 
-function validateConfig(config) {
-  for (const source of config.sources) {
-    if (!source.name) {
-      throw new Error("Nama setiap sumber wajib diisi");
-    }
-    if (source.intervalMin < 5 || source.intervalMin > 120) {
-      throw new Error(`Interval ${source.name} harus 5 sampai 120 menit`);
-    }
-    if (source.type === "greenhouse" && !source.boardToken) {
-      throw new Error(`Board token ${source.name} wajib diisi`);
-    }
-    if (source.type === "lever" && !source.company) {
-      throw new Error(`Company slug ${source.name} wajib diisi`);
-    }
-    if (source.type === "workday" && !source.endpoint) {
-      throw new Error(`Endpoint ${source.name} wajib diisi`);
-    }
-    if (["custom", "taleo"].includes(source.type)) {
-      if (!source.url || !source.itemSelector || !source.titleSelector || !source.linkSelector) {
-        throw new Error(`URL dan selector ${source.name} wajib diisi`);
-      }
-    }
-  }
-}
-
-function sourceUrl(source) {
-  if (source.type === "workday") {
-    return source.endpoint;
-  }
-  if (["custom", "taleo"].includes(source.type)) {
-    return source.url;
-  }
-  return "";
-}
-
 async function requestSourcePermissions(sources) {
-  const origins = [];
-  for (const source of sources) {
-    const rawUrl = sourceUrl(source);
-    if (!rawUrl) {
-      continue;
-    }
-    const url = new URL(rawUrl);
-    origins.push(`${url.protocol}//${url.host}/*`);
-  }
+  const origins = permissionOrigins(sources);
   if (origins.length === 0) {
     return true;
   }
-  return chrome.permissions.request({ origins: [...new Set(origins)] });
+  return chrome.permissions.request({ origins });
 }
 
 function updateTelegramBadge() {
   const ready = botToken.value.trim() && chatId.value.trim();
-  telegramBadge.textContent = ready ? "Siap" : "Belum lengkap";
+  telegramBadge.textContent = ready ? "Ready" : "Incomplete";
   telegramBadge.classList.toggle("ready", Boolean(ready));
 }
 
@@ -264,13 +225,13 @@ function renderCompanyDirectory() {
     link.href = company.jobListUrl;
     link.target = "_blank";
     link.rel = "noreferrer";
-    link.textContent = "Lihat lowongan aktif";
+    link.textContent = "View open jobs";
     const careerLink = document.createElement("a");
     careerLink.className = "company-link";
     careerLink.href = company.careerUrl;
     careerLink.target = "_blank";
     careerLink.rel = "noreferrer";
-    careerLink.textContent = "Tentang karier";
+    careerLink.textContent = "Career overview";
     const configure = document.createElement("button");
     configure.className = "configure-button";
     configure.type = "button";
@@ -308,36 +269,47 @@ chatId.addEventListener("input", updateTelegramBadge);
 companySearch.addEventListener("input", renderCompanyDirectory);
 sectorFilter.addEventListener("change", renderCompanyDirectory);
 
-document.querySelector("#testTelegram").addEventListener("click", async () => {
+document.querySelector("#testTelegram").addEventListener("click", async (event) => {
+  const button = event.currentTarget;
+  button.disabled = true;
   telegramResult.classList.remove("error");
-  telegramResult.textContent = "Mengirim pesan tes...";
-  const response = await chrome.runtime.sendMessage({
-    type: "test-telegram",
-    telegram: {
-      token: botToken.value.trim(),
-      chatId: chatId.value.trim()
+  telegramResult.textContent = "Sending a test message...";
+  try {
+    const response = await chrome.runtime.sendMessage({
+      type: "test-telegram",
+      telegram: {
+        token: botToken.value.trim(),
+        chatId: chatId.value.trim()
+      }
+    });
+    if (!response?.ok) {
+      throw new Error(response?.error || "Telegram connection test failed");
     }
-  });
-  telegramResult.textContent = response.ok ? "Pesan tes terkirim." : response.error;
-  telegramResult.classList.toggle("error", !response.ok);
+    telegramResult.textContent = "Test message sent.";
+  } catch (error) {
+    telegramResult.textContent = error.message;
+    telegramResult.classList.add("error");
+  } finally {
+    button.disabled = false;
+  }
 });
 
 document.querySelector("#saveSettings").addEventListener("click", async () => {
   saveResult.classList.remove("error");
-  saveResult.textContent = "Menyimpan...";
+  saveResult.textContent = "Saving...";
   try {
     const config = collectConfig();
     validateConfig(config);
     const permitted = await requestSourcePermissions(config.sources);
     if (!permitted) {
-      throw new Error("Izin domain ditolak");
+      throw new Error("Host permission was denied");
     }
     await saveConfig(config);
     const response = await chrome.runtime.sendMessage({ type: "sync-config" });
     if (!response.ok) {
       throw new Error(response.error);
     }
-    saveResult.textContent = "Pengaturan tersimpan.";
+    saveResult.textContent = "Settings saved.";
   } catch (error) {
     saveResult.textContent = error.message;
     saveResult.classList.add("error");

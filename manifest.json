@@ -2,22 +2,20 @@
   "manifest_version": 3,
   "name": "Career Pulse",
   "version": "1.0.0",
-  "description": "Pantau portal karier dan kirim lowongan baru ke Telegram.",
+  "description": "Monitor career portals and send new-job alerts to Telegram.",
+  "minimum_chrome_version": "109",
   "permissions": [
     "alarms",
     "storage",
     "offscreen"
   ],
   "optional_host_permissions": [
-    "https://*/*",
-    "http://*/*"
+    "https://*/*"
   ],
   "host_permissions": [
     "https://boards-api.greenhouse.io/*",
     "https://api.lever.co/*",
-    "https://api.telegram.org/*",
-    "https://*.myworkdayjobs.com/*",
-    "https://*.taleo.net/*"
+    "https://api.telegram.org/*"
   ],
   "background": {
     "service_worker": "background/service-worker.js",
@@ -27,5 +25,8 @@
     "default_title": "Career Pulse",
     "default_popup": "popup/popup.html"
   },
-  "options_page": "options/options.html"
+  "options_page": "options/options.html",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
 }

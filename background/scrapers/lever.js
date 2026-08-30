@@ -1,7 +1,7 @@
 export async function scrapeLever(source) {
   const company = source.company?.trim();
   if (!company) {
-    throw new Error("Company slug wajib diisi");
+    throw new Error("Company slug is required");
   }
   const url = `https://api.lever.co/v0/postings/${encodeURIComponent(company)}?mode=json`;
   const response = await fetch(url);

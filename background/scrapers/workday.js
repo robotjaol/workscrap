@@ -1,12 +1,17 @@
+import { validateHttpsUrl } from "../../lib/config-validator.js";
+
 function createEndpoint(source) {
   if (source.endpoint?.trim()) {
-    return source.endpoint.trim();
+    return validateHttpsUrl(source.endpoint, "Workday endpoint").href;
   }
   if (!source.host || !source.tenant || !source.site) {
-    throw new Error("Endpoint Workday belum lengkap");
+    throw new Error("Workday endpoint is incomplete");
   }
   const host = source.host.replace(/^https?:\/\//, "").replace(/\/$/, "");
-  return `https://${host}/wday/cxs/${source.tenant}/${source.site}/jobs`;
+  return validateHttpsUrl(
+    `https://${host}/wday/cxs/${source.tenant}/${source.site}/jobs`,
+    "Workday endpoint"
+  ).href;
 }
 
 function jobUrl(endpoint, path) {

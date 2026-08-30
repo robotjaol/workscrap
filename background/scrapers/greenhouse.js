@@ -1,7 +1,7 @@
 export async function scrapeGreenhouse(source) {
   const token = source.boardToken?.trim();
   if (!token) {
-    throw new Error("Board token wajib diisi");
+    throw new Error("Board token is required");
   }
   const url = `https://boards-api.greenhouse.io/v1/boards/${encodeURIComponent(token)}/jobs`;
   const response = await fetch(url);

@@ -1,20 +1,19 @@
 import { parseJobsFromHtml } from "../html-parser.js";
+import { validateHttpsUrl } from "../../lib/config-validator.js";
 
 export async function scrapeGenericHtml(source) {
-  if (!source.url?.trim()) {
-    throw new Error("URL sumber wajib diisi");
-  }
+  const url = validateHttpsUrl(source.url, "Source URL");
   if (!source.itemSelector || !source.titleSelector || !source.linkSelector) {
-    throw new Error("Selector wajib belum lengkap");
+    throw new Error("Required selectors are incomplete");
   }
-  const response = await fetch(source.url.trim());
+  const response = await fetch(url.href);
   if (!response.ok) {
     throw new Error(`Career page HTTP ${response.status}`);
   }
   const html = await response.text();
   const jobs = await parseJobsFromHtml(html, source);
   if (jobs.length === 0) {
-    const error = new Error("Selector tidak menemukan lowongan");
+    const error = new Error("The configured selectors found no jobs");
     error.code = "SELECTOR_EMPTY";
     throw error;
   }

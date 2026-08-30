@@ -41,8 +41,8 @@ const scrapers = {
 function randomDelay(source) {
   const minimum = Math.max(5, Number(source.intervalMin) || 15);
   const maximum = source.type === "custom" || source.type === "taleo"
-    ? Math.max(minimum, 15)
-    : Math.max(minimum, Math.min(15, minimum + 5));
+    ? Math.max(15, minimum + 5)
+    : minimum + 5;
   return minimum + Math.random() * (maximum - minimum);
 }
 
@@ -90,7 +90,7 @@ async function syncSchedules(runSoon = false) {
   await setActivity({
     active: activeIds.size > 0,
     lastCheck: Date.now(),
-    message: activeIds.size > 0 ? "Monitoring aktif" : "Belum ada sumber aktif"
+    message: activeIds.size > 0 ? "Monitoring is active" : "No active sources"
   });
 }
 
@@ -100,7 +100,7 @@ async function handleSelectorFailure(source, config, previousState) {
     emptyCycles,
     failures: 0,
     lastCheck: Date.now(),
-    lastError: "Selector tidak menemukan lowongan"
+    lastError: "The configured selectors found no jobs"
   };
   if (emptyCycles >= 2 && !previousState.selectorWarned) {
     if (isTelegramReady(config.telegram)) {
@@ -143,7 +143,7 @@ async function deliverJobs(source, jobs, config, previousIds) {
 
 async function pollSource(source, manual = false) {
   if (runningSources.has(source.id)) {
-    return { ok: false, error: "Pemeriksaan masih berjalan" };
+    return { ok: false, error: "A check is already running" };
   }
   runningSources.add(source.id);
   const checkedAt = Date.now();
@@ -151,10 +151,14 @@ async function pollSource(source, manual = false) {
     const config = await getConfig();
     const scraper = scrapers[source.type];
     if (!scraper) {
-      throw new Error(`Tipe sumber tidak dikenal: ${source.type}`);
+      throw new Error(`Unsupported source type: ${source.type}`);
     }
     const jobs = await scraper(source);
-    console.info("Career Pulse jobs", source.name, jobs);
+    console.info("Career Pulse check", {
+      sourceId: source.id,
+      sourceName: source.name,
+      jobCount: jobs.length
+    });
     const snapshots = await getSnapshots();
     const previousIds = snapshots[source.id];
     if (!previousIds) {
@@ -212,7 +216,7 @@ async function pollSource(source, manual = false) {
     await setActivity({
       active: true,
       lastCheck: checkedAt,
-      message: `Pemeriksaan terakhir ${source.name}`
+      message: `Last checked ${source.name}`
     });
   }
 }

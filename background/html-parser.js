@@ -44,7 +44,7 @@ export async function parseJobsFromHtml(html, source) {
     }
   });
   if (!response?.ok) {
-    throw new Error(response?.error || "Parser HTML gagal");
+    throw new Error(response?.error || "HTML parsing failed");
   }
   return response.jobs;
 }

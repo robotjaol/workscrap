@@ -8,6 +8,10 @@ import { scrapeGreenhouse } from "../background/scrapers/greenhouse.js";
 import { scrapeLever } from "../background/scrapers/lever.js";
 import { scrapeWorkday } from "../background/scrapers/workday.js";
 import { COMPANY_DIRECTORY, JOB_RESOURCES } from "../lib/company-directory.js";
+import {
+  permissionOrigins,
+  validateConfig
+} from "../lib/config-validator.js";
 
 function jsonResponse(data, status = 200) {
   return {
@@ -24,6 +28,7 @@ async function testDiffEngine() {
   ];
   assert.deepEqual(createBaseline(jobs), ["a", "b"]);
   assert.deepEqual(findNewJobs(jobs, ["a"]), [jobs[1]]);
+  assert.deepEqual(findNewJobs([jobs[1], jobs[1]], ["a"]), [jobs[1]]);
   assert.deepEqual(mergeSnapshot(["b", "c"], ["a", "b"]), ["b", "c", "a"]);
 }
 
@@ -42,6 +47,45 @@ async function testCompanyDirectory() {
   assert.equal(COMPANY_DIRECTORY.filter((company) => company.sector === "FMCG").length, 12);
   assert.equal(COMPANY_DIRECTORY.filter((company) => company.sector === "Manufacturing").length, 11);
   assert.equal(JOB_RESOURCES[0].name, "Disnakerja");
+}
+
+async function testConfigValidation() {
+  const source = {
+    id: "source-1",
+    type: "custom",
+    name: "Acme",
+    url: "https://acme.test/careers",
+    itemSelector: ".job",
+    titleSelector: ".title",
+    linkSelector: "a",
+    intervalMin: 15,
+    enabled: true
+  };
+  const config = { telegram: { token: "", chatId: "" }, sources: [source] };
+  assert.equal(validateConfig(config), config);
+  assert.deepEqual(permissionOrigins(config.sources), ["https://acme.test/*"]);
+  assert.throws(
+    () => validateConfig({ ...config, sources: [{ ...source, url: "http://acme.test" }] }),
+    /must use HTTPS/
+  );
+  assert.throws(
+    () => validateConfig({
+      ...config,
+      sources: [{ ...source, url: "https://user:pass@acme.test/careers" }]
+    }),
+    /must not include credentials/
+  );
+  assert.throws(
+    () => validateConfig({ ...config, sources: [source, { ...source }] }),
+    /must be unique/
+  );
+  assert.throws(
+    () => validateConfig({
+      ...config,
+      telegram: { token: "secret", chatId: "" }
+    }),
+    /must be configured together/
+  );
 }
 
 async function testGreenhouse() {
@@ -110,6 +154,10 @@ async function testWorkday() {
   });
   assert.equal(jobs.length, 2);
   assert.equal(jobs[1].url, "https://acme.test/job/manager");
+  await assert.rejects(
+    () => scrapeWorkday({ endpoint: "http://acme.test/jobs" }),
+    /must use HTTPS/
+  );
 }
 
 async function testServiceWorker() {
@@ -158,7 +206,7 @@ async function testServiceWorker() {
         if (message.target === "offscreen-parser") {
           return { ok: true, jobs: [] };
         }
-        throw new Error("Pesan runtime tak terduga");
+        throw new Error("Unexpected runtime message");
       },
       onInstalled: {
         addListener: (listener) => {
@@ -210,7 +258,7 @@ async function testServiceWorker() {
         text: async () => "<html><body></body></html>"
       };
     }
-    throw new Error(`URL tak terduga ${url}`);
+    throw new Error(`Unexpected URL ${url}`);
   };
 
   await import(`../background/service-worker.js?test=${Date.now()}`);
@@ -254,8 +302,9 @@ async function testServiceWorker() {
 
 await testDiffEngine();
 await testCompanyDirectory();
+await testConfigValidation();
 await testGreenhouse();
 await testLever();
 await testWorkday();
 await testServiceWorker();
-console.log("Semua tes lulus");
+console.log("All tests passed");

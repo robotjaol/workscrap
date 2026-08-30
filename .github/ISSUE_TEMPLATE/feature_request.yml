@@ -1,0 +1,37 @@
+name: Feature request
+description: Propose a focused improvement to Career Pulse.
+title: "[Feature]: "
+labels: [enhancement, needs-triage]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: Explain the user need without prescribing an implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the behavior and why it fits the project's local-first scope.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: textarea
+    id: permissions
+    attributes:
+      label: Privacy and permission impact
+      description: Note any new browser permissions, stored data, or external services.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues and pull requests.
+          required: true
+        - label: This request does not require bypassing authentication, rate limits, or access controls.
+          required: true

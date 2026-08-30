@@ -84,6 +84,6 @@ export async function getActivity() {
   return read(ACTIVITY_KEY, {
     active: false,
     lastCheck: null,
-    message: "Belum pernah diperiksa"
+    message: "No checks have run yet"
   });
 }

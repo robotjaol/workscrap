@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="id">
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,35 +12,35 @@
         <div class="brand-mark">CP</div>
         <div>
           <h1>Career Pulse</h1>
-          <p id="statusText">Memuat status...</p>
+          <p id="statusText">Loading status...</p>
         </div>
-        <span id="statusDot" class="status-dot"></span>
+        <span id="statusDot" class="status-dot" aria-hidden="true"></span>
       </header>
 
       <section class="summary">
         <div>
-          <span>Sumber aktif</span>
+          <span>Active sources</span>
           <strong id="activeCount">0</strong>
         </div>
         <div>
-          <span>Alert tersimpan</span>
+          <span>Saved alerts</span>
           <strong id="alertCount">0</strong>
         </div>
       </section>
 
       <section class="activity">
         <div class="section-title">
-          <h2>Alert terbaru</h2>
-          <span>5 terakhir</span>
+          <h2>Recent alerts</h2>
+          <span>Latest 5</span>
         </div>
-        <div id="emptyAlerts" class="empty-alerts">Belum ada alert terkirim.</div>
+        <div id="emptyAlerts" class="empty-alerts">No alerts have been sent yet.</div>
         <ol id="alertList"></ol>
       </section>
 
       <div id="checkResult" class="check-result" role="status"></div>
       <div class="actions">
-        <button id="manualCheck" class="primary" type="button">Cek sekarang</button>
-        <button id="openOptions" class="secondary" type="button">Pengaturan</button>
+        <button id="manualCheck" class="primary" type="button">Check now</button>
+        <button id="openOptions" class="secondary" type="button">Settings</button>
       </div>
     </main>
     <script type="module" src="popup.js"></script>

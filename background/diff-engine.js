@@ -4,7 +4,15 @@ function jobId(job) {
 
 export function findNewJobs(jobs, seenIds) {
   const seen = new Set(seenIds.map(String));
-  return jobs.filter((job) => !seen.has(jobId(job)));
+  const newJobs = [];
+  for (const job of jobs) {
+    const id = jobId(job);
+    if (!seen.has(id)) {
+      newJobs.push(job);
+      seen.add(id);
+    }
+  }
+  return newJobs;
 }
 
 export function mergeSnapshot(ids, previousIds) {

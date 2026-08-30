@@ -21,6 +21,15 @@ function stableHash(value) {
   return (hash >>> 0).toString(36);
 }
 
+function safeJobUrl(href, baseUrl) {
+  try {
+    const url = new URL(href || baseUrl, baseUrl);
+    return url.protocol === "https:" ? url.href : "";
+  } catch {
+    return "";
+  }
+}
+
 function parseJobs(message) {
   const parser = new DOMParser();
   const documentNode = parser.parseFromString(message.html, "text/html");
@@ -29,7 +38,7 @@ function parseJobs(message) {
   return items.map((item) => {
     const linkNode = item.querySelector(selectors.link);
     const href = linkNode?.getAttribute("href")?.trim() || "";
-    const url = href ? new URL(href, message.baseUrl).href : message.baseUrl;
+    const url = safeJobUrl(href, message.baseUrl);
     const title = textFrom(item, selectors.title);
     const explicitId = attributeFrom(item, selectors.id, "data-job-id") ||
       textFrom(item, selectors.id);

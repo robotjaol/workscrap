@@ -23,7 +23,7 @@ export function isTelegramReady(config) {
 
 export async function sendTelegram(config, text) {
   if (!isTelegramReady(config)) {
-    throw new Error("Telegram belum dikonfigurasi");
+    throw new Error("Telegram is not configured");
   }
   return callTelegram(config.token.trim(), "sendMessage", {
     chat_id: config.chatId.trim(),
@@ -35,13 +35,13 @@ export async function sendTelegram(config, text) {
 export async function testTelegram(config) {
   return sendTelegram(
     config,
-    "Career Pulse terhubung. Alert lowongan siap dikirim."
+    "Career Pulse is connected. New-job alerts are ready."
   );
 }
 
 export function formatJobAlert(source, job) {
   const lines = [
-    "Lowongan baru",
+    "New job",
     source.name,
     job.title
   ];
@@ -54,9 +54,9 @@ export function formatJobAlert(source, job) {
 
 export function formatSourceWarning(source) {
   return [
-    "Peringatan Career Pulse",
+    "Career Pulse warning",
     source.name,
-    "Selector tidak menemukan lowongan selama dua pemeriksaan.",
-    "Periksa konfigurasi selector situs."
+    "The configured selectors found no jobs during two consecutive checks.",
+    "Review the site's selector configuration."
   ].join("\n");
 }
